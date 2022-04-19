@@ -1,12 +1,15 @@
 from flask import render_template, request
-
 from . import boxit_api
 from ..models.mogodb_utils import get_roomdetails
 from models.database_config import mongodb
 
 @boxit_api.route("/")
 def home():
-    print("Sender IP: \n\n", request.headers['X-Appengine-User-Ip'])
+    if not request.headers.getlist("X-Forwarded-For"):
+        ip = request.remote_add
+    else:
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    print("Sender IP: \n\n", ip)
     return render_template('boxit/home.html')
 
 @boxit_api.route("/local")
