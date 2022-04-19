@@ -6,7 +6,7 @@ from models.database_config import mongodb
 
 @boxit_api.route("/")
 def home():
-    print("Sender IP: \n\n", request.environ['REMOTE_ADDR'])
+    print("Sender IP: \n\n", request.headers['X-Appengine-User-Ip'])
     return render_template('boxit/home.html')
 
 @boxit_api.route("/local")
