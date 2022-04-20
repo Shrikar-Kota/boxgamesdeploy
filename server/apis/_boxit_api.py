@@ -5,6 +5,11 @@ from models.database_config import mongodb
 
 @boxit_api.route("/")
 def home():
+    if not request.headers.getlist("X-Forwarded-For"):
+        ip = request.remote_add
+    else:
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    print("Sender IP: \n", ip, "\n\n")
     return render_template('boxit/home.html')
 
 @boxit_api.route("/local")
