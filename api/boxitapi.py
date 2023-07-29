@@ -1,7 +1,7 @@
 from flask import render_template, request
 from . import boxitApi
 from dal.gameroom import get_roomdetails
-from utils.database_config import mongodb
+from utils.databaseconfig import mongodb
 
 @boxitApi.route("/")
 def home():
