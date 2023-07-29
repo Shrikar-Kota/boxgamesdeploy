@@ -1,7 +1,6 @@
 import pymongo
-import os
+from utils import configreader
 import certifi
 
-mongo = pymongo.MongoClient(os.getenv("DB_URL"), tlsCAFile=certifi.where())
+mongo = pymongo.MongoClient(configreader.getdbconnectionstring(), tlsCAFile=certifi.where())
 mongodb = mongo.boxit
-
