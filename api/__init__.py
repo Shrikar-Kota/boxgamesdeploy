@@ -1,15 +1,16 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, Blueprint
 from flask_socketio import SocketIO
 
 socketio = SocketIO()
 
-def createapp(debug = False):
+boxitApi = Blueprint("boxit_api", __name__)
+
+def createapp(debug):
     app = Flask(__name__, template_folder = "../templates", static_folder = "../static", static_url_path = '')
     app.secret_key = "secret"
     app.debug = debug
-    from .apis import boxit_api
     
-    app.register_blueprint(boxit_api, url_prefix = "/boxit")
+    app.register_blueprint(boxitApi, url_prefix = "/boxit")
     
     @app.route('/')
     def index():
@@ -17,3 +18,5 @@ def createapp(debug = False):
     
     socketio.init_app(app)
     return app
+
+from . import boxit_api, boxit_sockets

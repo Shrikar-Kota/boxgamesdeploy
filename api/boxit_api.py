@@ -1,25 +1,25 @@
 from flask import render_template, request
-from . import boxit_api
-from ..dal.gameroom import get_roomdetails
+from . import boxitApi
+from dal.gameroom import get_roomdetails
 from utils.database_config import mongodb
 
-@boxit_api.route("/")
+@boxitApi.route("/")
 def home():
     return render_template('boxit/home.html')
 
-@boxit_api.route("/local")
+@boxitApi.route("/local")
 def local():
     return render_template('boxit/local.html')
 
-@boxit_api.route("/multiplayer")
+@boxitApi.route("/multiplayer")
 def multiplayer():
     return render_template('boxit/multiplayer.html')
     
-@boxit_api.route("/howtoplay")
+@boxitApi.route("/howtoplay")
 def howtoplay():
     return render_template('boxit/howtoplay.html')    
     
-@boxit_api.route("/waitinglobby")
+@boxitApi.route("/waitinglobby")
 def waitinglobby():
     roomid = request.args.get("id")
     if roomid:
@@ -29,7 +29,7 @@ def waitinglobby():
             return render_template('boxit/waitinglobby.html', roomid = roomid)
     return render_template('boxit/home.html')    
 
-@boxit_api.route("/online")
+@boxitApi.route("/online")
 def online():
     roomid = request.args.get("id")
     playername = request.args.get("playername")

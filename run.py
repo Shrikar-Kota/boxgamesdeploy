@@ -1,6 +1,12 @@
-from server import createapp
+from api import createapp
 
-app = createapp(debug = False)
-
+def startApp(debug=False):
+    app = createapp(debug)
+    if not debug:
+        app.run()
+    else:
+        from api import socketio
+        socketio.run(app)
+        
 if __name__ == "__main__":
-    app.run()
+    startApp()
