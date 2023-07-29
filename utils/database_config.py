@@ -1,5 +1,5 @@
 import pymongo
-from utils import configreader
+from . import configreader
 import certifi
 
 mongo = pymongo.MongoClient(configreader.getdbconnectionstring(), tlsCAFile=certifi.where())

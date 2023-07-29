@@ -1,5 +1,3 @@
-from models.database_config import mongodb
-
 def get_all_documents(collection):
     return collection.find()
 

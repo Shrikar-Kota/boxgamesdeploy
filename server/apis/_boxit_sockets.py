@@ -3,9 +3,9 @@ from flask import session
 from flask_socketio import emit, join_room, rooms
 from random import randrange
 
-from models.database_config import mongodb
+from utils.database_config import mongodb
 from .. import socketio
-from ..models.mogodb_utils import get_all_documents, create_new_room, get_roomdetails, delete_room_details, update_room_details
+from ..dal.gameroom import get_all_documents, create_new_room, get_roomdetails, delete_room_details, update_room_details
 
 @socketio.on('createroom', namespace = '/boxit')
 def createroom():
