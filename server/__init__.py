@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_socketio import SocketIO
 
 socketio = SocketIO()
@@ -10,6 +10,10 @@ def createapp(debug = False):
     from .apis import boxit_api
     
     app.register_blueprint(boxit_api, url_prefix = "/boxit")
+    
+    @app.route('/')
+    def index():
+        return render_template('index.html')
     
     socketio.init_app(app)
     return app
