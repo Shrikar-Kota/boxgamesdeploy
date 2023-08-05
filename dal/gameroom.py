@@ -11,4 +11,5 @@ def update_room_details(id, collection, data):
     return collection.update_one({"_id": id}, {"$set": data})
 
 def delete_room_details(id, collection):
+    print(id)
     return collection.delete_one({"_id": id})

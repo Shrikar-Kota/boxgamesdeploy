@@ -1,4 +1,6 @@
 from flask import render_template, request
+from datetime import datetime, timezone
+
 from . import boxitApi
 from dal.gameroom import get_roomdetails
 from utils.databaseconfig import mongodb
@@ -7,13 +9,13 @@ from utils.databaseconfig import mongodb
 def home():
     return render_template('boxit/home.html')
 
-@boxitApi.route("/local")
+@boxitApi.route("/localmultiplayer")
 def local():
-    return render_template('boxit/local.html')
+    return render_template('boxit/localmultiplayer.html')
 
-@boxitApi.route("/multiplayer")
+@boxitApi.route("/onlinemultiplayer")
 def multiplayer():
-    return render_template('boxit/multiplayer.html')
+    return render_template('boxit/onlinemultiplayer.html')
     
 @boxitApi.route("/howtoplay")
 def howtoplay():
@@ -26,7 +28,11 @@ def waitinglobby():
         roomid = int(roomid)
         roomdetails = get_roomdetails(roomid, mongodb["gamedata"])
         if roomdetails is not None:
-            return render_template('boxit/waitinglobby.html', roomid = roomid)
+            timeelapsed = int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) - roomdetails['starttime']
+            timeleft = 30 - timeelapsed
+            if timeleft <= 0:
+                timeleft = 0
+            return render_template('boxit/onlinewaitinglobby.html', roomid = roomid, timeleft = timeleft)
     return render_template('boxit/home.html')    
 
 @boxitApi.route("/online")

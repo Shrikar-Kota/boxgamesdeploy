@@ -2,8 +2,9 @@ from os import name
 from flask import session
 from flask_socketio import emit, join_room, rooms
 from random import randrange
-
 from utils.databaseconfig import mongodb
+from datetime import datetime, timezone
+
 from . import socketio
 from dal.gameroom import get_all_documents, create_new_room, get_roomdetails, delete_room_details, update_room_details
 
@@ -15,7 +16,8 @@ def createroom():
         newid = randrange(10**6, 10**7)
     gamedetails = {
         "_id": newid,
-        "playercount": 1
+        "playercount": 1,
+        "starttime": int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
     }
     try:
         create_new_room(mongodb["gamedata"], gamedetails)
