@@ -1,4 +1,4 @@
-const socket = io.connect("http://" + document.domain + ":" + location.port + "/boxit");
+const socket = io.connect(location.protocol + "//" + document.domain + ":" + location.port + "/boxit");
 
 socket.on("roomcreationerror", () => alert("Internal server error.\nTry later."));
 
