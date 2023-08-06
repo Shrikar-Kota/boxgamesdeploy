@@ -1,2 +1,5 @@
 *.ini
 __pycache__/
+.space
+Spacefile
+.spaceignore

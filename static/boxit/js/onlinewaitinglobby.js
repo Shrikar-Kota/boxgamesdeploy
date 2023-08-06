@@ -1,4 +1,4 @@
-var socket = io.connect("http://" + document.domain + ":" + location.port + "/boxit");
+var socket = io.connect(location.protocol + "//" + document.domain + ":" + location.port + "/boxit");
 
 //when opponent joins
 socket.on('opponentjoined', (roomid) => window.location.href = onlineurl + "?id=" + roomid["roomid"] + "&playername=1");
