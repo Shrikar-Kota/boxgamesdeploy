@@ -16,7 +16,7 @@ def createapp(debug):
     def index():
         return render_template('index.html')
     
-    socketio.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="*", engineio_logger=True)
     return app
 
 from . import __boxitapi, __boxitsockets
