@@ -1,12 +1,12 @@
 from api import createapp
+import config
 
-def startApp(debug=False):
-    app = createapp(debug)
-    if not debug:
-        app.run()
-    else:
-        from api import socketio
-        socketio.run(app)
+app = createapp(False)
         
 if __name__ == "__main__":
-    startApp(True)
+    if config.APP_STARTUP_TYPE == 'DEBUG':
+        app.debug = True
+        from api import socketio
+        socketio.run(app)    
+    else:
+        app.run()

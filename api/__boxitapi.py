@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 
 from . import boxitApi
 from dal.gameroom import get_roomdetails
-from utils.databaseconfig import mongodb
 
 @boxitApi.route("/")
 def home():
@@ -26,7 +25,7 @@ def waitinglobby():
     roomid = request.args.get("id")
     if roomid:
         roomid = int(roomid)
-        roomdetails = get_roomdetails(roomid, mongodb["gamedata"])
+        roomdetails = get_roomdetails(roomid)
         if roomdetails is not None:
             timeelapsed = int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) - roomdetails['starttime']
             timeleft = 30 - timeelapsed
@@ -41,7 +40,7 @@ def online():
     playername = request.args.get("playername")
     if roomid and playername:
         roomid = int(roomid); playername = int(playername)
-        roomdetails = get_roomdetails(roomid, mongodb["gamedata"])
+        roomdetails = get_roomdetails(roomid)
         if roomdetails is not None:
             return render_template('boxit/online.html', roomid = roomid, playername = playername)
     return render_template('boxit/home.html')

@@ -19,4 +19,4 @@ def createapp(debug):
     socketio.init_app(app)
     return app
 
-from . import boxitapi, boxitsockets
+from . import __boxitapi, __boxitsockets

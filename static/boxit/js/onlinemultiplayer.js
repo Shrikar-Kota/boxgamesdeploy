@@ -18,11 +18,11 @@ const performOnLoad = () => {
 }
 
 const onJoinRoomClick = () => {
-    $('#joinroom-modal').modal('show');
+    $('#joinroom-modal').modal({backdrop: 'static', keyboard: false}, 'show');
 }
 
 const onCreateRoomClick = () => {
-    $('#createloader-modal').modal('show');
+    $('#createloader-modal').modal({backdrop: 'static', keyboard: false}, 'show');
     socket.emit('createroom');
 }
 
@@ -30,15 +30,17 @@ const OnJoinRoomModalClick = () => {
     $('#joinroom-modal').modal('hide');
     var roomid = document.querySelector("#roomid-field").value;
     document.querySelector("#roomid-field").value = '';
-    console.log(typeof(roomid))
     if (/^\d{7}$/.test(roomid)){
         socket.emit('findroom', {"roomid": parseInt(roomid)});
         displayJoinLoader();
     }
+    else{
+        displayInvalidRoom();
+    }
 }
 
 displayJoinLoader = () => {
-    $("#joinloader-modal").modal('show');
+    $("#joinloader-modal").modal({backdrop: 'static', keyboard: false}, 'show');
 }
 
 displayInvalidRoom = () => {

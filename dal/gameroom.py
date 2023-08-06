@@ -1,15 +1,16 @@
-def get_all_documents(collection):
-    return collection.find()
+from . import storage
 
-def get_roomdetails(id, collection):
-    return collection.find_one({"_id": id})
+def get_all_documents():
+    return storage.find('gamedata')
 
-def create_new_room(collection, data):
-    return collection.insert_one(data)
+def get_roomdetails(id):
+    return storage.find_one('gamedata', {"_id": id})
 
-def update_room_details(id, collection, data):
-    return collection.update_one({"_id": id}, {"$set": data})
+def create_new_room(data):
+    return storage.insert_one('gamedata', data)
 
-def delete_room_details(id, collection):
-    print(id)
-    return collection.delete_one({"_id": id})
+def update_room_details(id, data):
+    return storage.update_one('gamedata', {"_id": id}, data)
+
+def delete_room_details(id):
+    return storage.delete_one('gamedata', {"_id": id})

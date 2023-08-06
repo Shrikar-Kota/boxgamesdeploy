@@ -1,8 +1,5 @@
-from os import name
-from flask import session
 from flask_socketio import emit, join_room, rooms
 from random import randrange
-from utils.databaseconfig import mongodb
 from datetime import datetime, timezone
 
 from . import socketio
@@ -10,7 +7,7 @@ from dal.gameroom import get_all_documents, create_new_room, get_roomdetails, de
 
 @socketio.on('createroom', namespace = '/boxit')
 def createroom():
-    previds = [document["_id"] for document in get_all_documents(mongodb["gamedata"])]
+    previds = [document["_id"] for document in get_all_documents()]
     newid = randrange(10**6, 10**7)
     while newid in previds:
         newid = randrange(10**6, 10**7)
@@ -20,7 +17,7 @@ def createroom():
         "starttime": int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
     }
     try:
-        create_new_room(mongodb["gamedata"], gamedetails)
+        create_new_room(gamedetails)
         emit('roomcreated', {'roomid': newid}) 
     except:
         emit('roomecreationerror')
@@ -28,10 +25,10 @@ def createroom():
 @socketio.on('findroom', namespace = '/boxit')
 def findroom(payload):
     roomid = payload['roomid']
-    room_details = get_roomdetails(roomid, mongodb["gamedata"])
-    if room_details is not None or room_details["playercount"] != 2:
+    room_details = get_roomdetails(roomid)
+    if room_details is not None and room_details["playercount"] != 2:
         room_details["playercount"] = 2
-        update_room_details(roomid, mongodb["gamedata"], room_details)
+        update_room_details(roomid, room_details)
         emit('roomfound', {'roomid': roomid})
         emit('opponentjoined', {'roomid': roomid}, to = str(roomid)+"WL")
     else:
@@ -40,7 +37,7 @@ def findroom(payload):
 @socketio.on('joinroom', namespace = '/boxit')
 def joinroom(payload):
     roomid = payload['roomid']
-    room_details = get_roomdetails(roomid, mongodb["gamedata"])
+    room_details = get_roomdetails(roomid)
     if room_details is None:
         emit("roomnotfounderror")
     else:
@@ -49,7 +46,7 @@ def joinroom(payload):
 @socketio.on('joinwaitinglobby', namespace = '/boxit')
 def joinwaitinglobby(payload):
     roomid = payload['roomid']
-    room_details = get_roomdetails(roomid, mongodb["gamedata"])
+    room_details = get_roomdetails(roomid)
     if room_details is None:
         emit("roomnotfounderror")
     else:
@@ -57,10 +54,10 @@ def joinwaitinglobby(payload):
     
 @socketio.on('killroom', namespace = '/boxit')
 def killroom(payload):
-    id = payload["roomid"]
-    room_details = get_roomdetails(id, mongodb["gamedata"])
-    if room_details is not None and room_details["playercount"] !=2:
-        delete_room_details(id, mongodb["gamedata"])
+    roomid = payload["roomid"]
+    room_details = get_roomdetails(roomid)
+    if room_details is not None and room_details["playercount"] != 2:
+        delete_room_details(roomid)
     
 @socketio.on("gamerestartrequestsent", namespace = "/boxit")
 def gamerestartappealcreated():
@@ -100,11 +97,11 @@ def newmessagesent(payload):
 @socketio.on('disconnect', namespace = '/boxit')
 def disconnect():
     room_details = None
-    for i in rooms():
-        if type(i) == int:
-            room_details = get_roomdetails(i, mongodb["gamedata"])
+    for roomid in rooms():
+        if type(roomid) == int:
+            room_details = get_roomdetails(roomid)
             break
     if room_details is not None:
         if room_details["playercount"] == 2:
             emit("opponentdisconnected", room = room_details['_id'])
-            delete_room_details(room_details["_id"], mongodb["gamedata"])
+            delete_room_details(room_details["_id"])
