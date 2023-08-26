@@ -261,16 +261,16 @@ const getOptimalMove = (moveResult, difficultyLevel, playerRole) => {
                 result.moves = moveResult.Draw.moves;
                 result.index = moveResult.Draw.index;
             }
-            else if (moveResult.Loss.index[0] != -1)
-            {
-                result.moves = moveResult.Loss.moves;
-                result.index = moveResult.Loss.index;
-            }
-            else
+            else if (moveResult.Win.index[0] != -1)
             {
                 result.result = 1;
                 result.moves = moveResult.Win.moves;
                 result.index = moveResult.Win.index;
+            }
+            else
+            {
+                result.moves = moveResult.Loss.moves;
+                result.index = moveResult.Loss.index;
             }
         }
         else
