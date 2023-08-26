@@ -25,7 +25,7 @@ const clearGameArea = () => {
 
 const restartGameRequest = () => {
     hideModals();
-    $('#restartresponse-modal').modal('show');
+    $('#restartresponse-modal').modal({backdrop: 'static', keyboard: false}, 'show');
 }
 
 const restartGameAccepted = () => {
@@ -99,7 +99,7 @@ const setGameArea = () => {
 const onRestartButtonClick = () => {
     socket.emit("gamerestartrequestsent");
     hideModals();
-    $('#restartrequested-modal').modal('show');
+    $('#restartrequested-modal').modal({backdrop: 'static', keyboard: false}, 'show');
 }
 
 const onRestartRequestAccept = () => {
@@ -188,7 +188,7 @@ const updatePlayerScores = () => {
         var playernames = ["Player 1", "Player 2"];
         document.querySelector("#info-div").innerHTML = '';
         hideModals();
-        $('#winner-modal').modal('show');
+        $('#winner-modal').modal({backdrop: 'static', keyboard: false}, 'show');
         document.querySelector('#winner-player').innerHTML = playernames[currentturn-1];
     }
 }
