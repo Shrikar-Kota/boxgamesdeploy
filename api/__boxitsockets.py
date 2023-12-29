@@ -60,39 +60,54 @@ def killroom(payload):
         delete_room_details(roomid)
     
 @socketio.on("gamerestartrequestsent", namespace = "/boxit")
-def gamerestartappealcreated():
-    for i in rooms():
-        if type(i) == int:
-            emit("gamerestartrequested", room = i, include_self = False)
-            break
+def gamerestartappealcreated(payload):
+    roomid = payload["roomid"]
+    room_details = get_roomdetails(roomid)
+    if room_details is not None:
+        emit("gamerestartrequested", room = roomid, include_self = False)
         
 @socketio.on("gamerestartacceptsent", namespace = "/boxit")
-def gamerestartappealaccepted():
-    for i in rooms():
-        if type(i) == int:
-            emit("gamerestartaccepted", room = i, include_self = False)
-            break
+def gamerestartappealaccepted(payload):
+    roomid = payload["roomid"]
+    room_details = get_roomdetails(roomid)
+    if room_details is not None:
+        emit("gamerestartaccepted", room = roomid, include_self = False)
         
 @socketio.on("gamerestartdeclinesent", namespace = "/boxit")
-def gamerestartappealdeclined():
-    for i in rooms():
-        if type(i) == int:
-            emit("gamerestartdeclined", room = i, include_self = False)
-            break
-  
+def gamerestartappealdeclined(payload):
+    roomid = payload["roomid"]
+    room_details = get_roomdetails(roomid)
+    if room_details is not None:
+        emit("gamerestartdeclined", room = roomid, include_self = False)
+    
 @socketio.on("moveplayed", namespace = "/boxit")
 def moveplayed(payload):
-    for i in rooms():
-        if type(i) == int:
-            emit("opponentmoveplayed", payload, room = i, include_self = False)
-            break
-  
+    roomid = payload["roomid"]
+    room_details = get_roomdetails(roomid)
+    if room_details is not None:
+        emit("opponentmoveplayed", payload, room = roomid, include_self = False)
+        
+@socketio.on("timelimitexceededtrigger", namespace = "/boxit")
+def timelimitexceeded(payload):
+    roomid = payload["roomid"]
+    room_details = get_roomdetails(roomid)
+    if room_details is not None:
+        emit("timelimitexceeded", room = roomid, include_self = True)
+        
+@socketio.on("resetmovetimerevent", namespace = "/boxit")
+def resetmovetimer(payload):
+    roomid = payload["roomid"]
+    room_details = get_roomdetails(roomid)
+    if room_details is not None:
+        emit("resetmovetimer", room = roomid, include_self = True)
+    
 @socketio.on("newmessagesent", namespace = "/boxit")
 def newmessagesent(payload):
-    for i in rooms():
-        if type(i) == int:
-            emit("newmessagereceived", payload, room = i, include_self = False)
-            break  
+    roomid = payload["roomid"]
+    room_details = get_roomdetails(roomid)
+    print(room_details)
+    if room_details is not None:
+        emit("newmessagereceived", payload, room = roomid, include_self = False)
         
 @socketio.on('disconnect', namespace = '/boxit')
 def disconnect():

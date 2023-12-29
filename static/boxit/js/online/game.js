@@ -12,13 +12,24 @@ socket.on('opponentmoveplayed', (payload) => updateGameArea(payload['linenumber'
 
 socket.on('newmessagereceived', (payload) => newMessageReceived(payload.message));
 
+socket.on('timelimitexceeded', () => timeLimitExceeded());
+
+socket.on('resetmovetimer', () => {
+    stopMoveTimer();
+    startMoveTimer();
+})
+
 var linesactive = {};
 var currentturn = 1;
 var turnsleft = 1;
 var player1score = 0;
 var player2score = 0;
 var maximumscore = 0;
-
+var moveTimeLimit = 30;
+var countdown = null;
+var isGameRunning = true;
+const playernames = ["Player 1", "Player 2"];
+    
 const clearGameArea = () => {
     document.querySelector("body").innerHTML = '<div class="col-12"><div class="col-lg-6 col-10 mx-auto my-5 p-3 border shadow-lg text-center"><div id="body-area" class="text-center"><h3>Opponent got disconnected!</h3><br></div><div class="col my-3" id="home-button"><a class="btn btn-md btn-fit btn-danger text-center" href="'+homeurl+'">Home</a></div></div></div>';
 }
@@ -42,10 +53,12 @@ const restartGameDeclined = () => {
 const restartGame = () => {
     resetAllFieldsToDefault();
     setGameArea();
+    socket.emit("resetmovetimerevent", {"roomid": roomid});
 }
 
 const performOnLoad = () => {
     socket.emit("joinroom", {"roomid": roomid});
+    socket.emit("resetmovetimerevent", {"roomid": roomid});
     setGameArea();
     document.querySelector("#playername").style.color = playername === 1 ? "blue" : "red"; 
     document.querySelector("#restartbutton").addEventListener("click", onRestartButtonClick);
@@ -70,7 +83,7 @@ const sendMessage = (event) => {
         if (event.target.value.length != 0){
             var colors = ["blue", "red"];
             document.querySelector("#chat-area").innerHTML += "<span style='color: " + colors[(playername+1)%2] + "'>" +  "You: </span>" + event.target.value + "<br>";
-            socket.emit("newmessagesent", {"message": event.target.value})
+            socket.emit("newmessagesent", {"message": event.target.value, "roomid": parseInt(roomid)})
             document.querySelector("#chat-input").value = "";
             gotoBottom();
         }
@@ -84,7 +97,6 @@ const gotoBottom = () => {
 
 const newMessageReceived = (message) => {
     var colors = ["blue", "red"];
-    var playernames = ["Player1", "Player2"];
     document.querySelector("#chat-area").innerHTML += "<span style='color: " + colors[playername%2] + "'>" + playernames[playername%2] + ": </span>" + message +"<br>";
     gotoBottom();
 }
@@ -97,19 +109,19 @@ const setGameArea = () => {
 }
 
 const onRestartButtonClick = () => {
-    socket.emit("gamerestartrequestsent");
+    socket.emit("gamerestartrequestsent", {"roomid": parseInt(roomid)});
     hideModals();
     $('#restartrequested-modal').modal({backdrop: 'static', keyboard: false}, 'show');
 }
 
 const onRestartRequestAccept = () => {
-    socket.emit("gamerestartacceptsent");
+    socket.emit("gamerestartacceptsent", {"roomid": parseInt(roomid)});
     restartGame();
     hideModals();
 }
 
 const onRestartRequestReject = () => {
-    socket.emit("gamerestartdeclinesent");
+    socket.emit("gamerestartdeclinesent", {"roomid": parseInt(roomid)});
     hideModals();
 }
 
@@ -120,20 +132,60 @@ const resetAllFieldsToDefault = () => {
     player1score = 0;
     player2score = 0;
     maximumscore = 0;
+    isGameRunning = true;
+}
+
+const timeLimitExceeded = () => {
+    hideModals();
+    stopMoveTimer();
+    $('#gameresult-modal').modal({backdrop: 'static', keyboard: false}, 'show');
+    document.querySelector('#gameresult-resulttext').innerHTML = `${playernames[currentturn%2]} won the game as the time limit exceeded!`;
+    document.querySelector('#gameresult-header').innerHTML = "Oops! Time's up!";
+    isGameRunning = false;
+}
+
+const startMoveTimer = () => {
+    var time = moveTimeLimit;
+
+    countdown = setInterval(() => {
+        if (time >= 0)
+        {
+            document.querySelector("#move-time-left").innerHTML = time;
+            time -= 1;
+        }
+    }, 1000);
+    setTimeout(
+        () => {
+            if (currentturn == playername) {
+                socket.emit('timelimitexceededtrigger', {"roomid": parseInt(roomid)});
+            }
+        },
+        1000*(moveTimeLimit+1)
+    )
+}
+
+const stopMoveTimer = () => {
+    if (countdown != null)
+    {
+        clearInterval(countdown);
+        document.querySelector("#move-time-left").innerHTML = '';
+        countdown = null;
+    }
 }
 
 //Game functions
 const onCellClick = (event) => {
     if (currentturn == playername){
         var linenumber = getLineNumber(event);
-        if (updateGameArea(linenumber, event.target.id)){
-            socket.emit("moveplayed", {"linenumber": linenumber, "targetid": event.target.id});
+        if (updateGameArea(linenumber, event.target.id)) {
+            socket.emit("moveplayed", {"linenumber": linenumber, "targetid": event.target.id, "roomid": parseInt(roomid)});
+            socket.emit("resetmovetimerevent", {"roomid": parseInt(roomid)});
         }
     }
 }
 
 const updateGameArea = (linenumber, targetid) => {
-    if (linesactive[targetid][linenumber] === 0){
+    if (linesactive[targetid][linenumber] === 0 && isGameRunning){
         turnsleft -= 1;
         var activatedlines = updateLinesActive(targetid, linenumber);
         changeBorderLines(activatedlines);
@@ -185,17 +237,16 @@ const updatePlayerScores = () => {
     document.querySelector("#p1-score").innerHTML = player1score;
     document.querySelector("#p2-score").innerHTML = player2score;
     if (player1score + player2score === maximumscore){
-        var playernames = ["Player 1", "Player 2"];
-        document.querySelector("#info-div").innerHTML = '';
         hideModals();
-        $('#winner-modal').modal({backdrop: 'static', keyboard: false}, 'show');
-        document.querySelector('#winner-player').innerHTML = playernames[currentturn-1];
+        $('#gameresult-modal').modal({backdrop: 'static', keyboard: false}, 'show');
+        document.querySelector('#gameresult-resulttext').innerHTML = `${playernames[currentturn-1]} won the game!`;
+        document.querySelector('#gameresult-header').innerHTML = "Game ended!";
+        isGameRunning = false;
     }
 }
 
 const updateTurn = () => {
     var colors = ["blue", "red"];
-    var playernames = ["Player1", "Player2"]
     document.querySelector("#turn").style.color = colors[currentturn-1];
     document.querySelector("#turn").innerHTML = playernames[currentturn-1];
 }
@@ -304,7 +355,7 @@ const sumOfCellElements = (arr) => {
 }
 
 const hideModals = () => {
-    $("#playerwon-modal").modal('hide');
+    $("#gameresult-modal").modal('hide');
     $("#restartdecline-modal").modal('hide');
     $("#restartaccept-modal").modal('hide');
     $("#restartrequested-modal").modal('hide');

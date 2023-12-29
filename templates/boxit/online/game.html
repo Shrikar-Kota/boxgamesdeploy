@@ -53,13 +53,16 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-12 text-center">
+                        <div class="col-6 text-left">
                             You are: <span id="playername">Player {{ playername }}</span>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12 text-center" id="info-div">
+                        <div class="col-6 text-right">
                             Turn: <span id="turn"></span>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12 text-center">
+                            Time left: <span id="move-time-left"></span>
                         </div>
                     </div>
                 </div>
@@ -86,11 +89,13 @@
             <input id="chat-input" style="width: 100%; height: 27px; border: 0px; border-top: 1px solid black">
         </div>
     </div>
-    <div class="modal" id="playerwon-modal" tabindex="-1" role="dialog">
+    <div class="modal" id="gameresult-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
             <div class="modal-content">
-                <div class="modal-body text-center">
-                    Player <span id="winner-player"></span> won the game!
+                <div class="modal-header">
+                    <h4 class="modal-title mx-auto font-weight-bold" id="gameresult-header"></h5>
+                </div>
+                <div class="modal-body text-center" id="gameresult-resulttext">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
